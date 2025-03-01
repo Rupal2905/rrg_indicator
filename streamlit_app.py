@@ -26,18 +26,20 @@ st.write('An interactive visualization tool for Relative Rotation Graphs (RRG)')
 
 # Initialize data
 @st.cache_data(ttl=3600)  # Cache data for 1 hour
-def fetch_data(period='1y'):
+def fetch_data(period='1y', interval='1wk'):
     tickers = ['^CNXAUTO', '^CNXFMCG', '^CNXIT', '^CNXREALTY', '^CNXCONSUM', 
                '^CNXMETAL', '^CNXENERGY', '^CNXMEDIA', '^CNXINFRA', '^CNXPSUBANK', '^NSEBANK']
     benchmark = '^NSEI'
 
-    # Use daily data for shorter periods
-    if period in ['1mo', '3mo', '6mo']:
-        interval = "1d"
-        window = 14  # 14 days for daily data
-    else:
-        interval = "1wk"
-        window = 14  # 14 weeks for weekly data
+    # Adjust window size based on interval
+    window_sizes = {
+        '1h': 24,   # 24 hours
+        '2h': 12,   # 24 hours
+        '4h': 6,    # 24 hours
+        '1d': 14,   # 14 days
+        '1wk': 14   # 14 weeks
+    }
+    window = window_sizes.get(interval, 14)
 
     tickers_data = yf.download(tickers, period=period, interval=interval, auto_adjust=False, multi_level_index=False)['Adj Close']
     benchmark_data = yf.download(benchmark, period=period, interval=interval, auto_adjust=False, multi_level_index=False)['Adj Close']
@@ -65,14 +67,31 @@ selected_period = st.sidebar.selectbox(
     help='Choose the time period for analysis.'
 )
 
-# Add informational message about data requirements
+# Add interval selection for shorter periods
+interval = '1wk'  # default interval
 if period_options[selected_period] in ['3mo', '6mo']:
-    st.sidebar.info("Using daily data for shorter time periods to ensure sufficient data points for analysis.")
+    interval_options = {
+        'Hourly (1h)': '1h',
+        '2 Hours (2h)': '2h',
+        '4 Hours (4h)': '4h',
+        'Daily (1d)': '1d',
+        'Weekly (1wk)': '1wk'
+    }
+    selected_interval = st.sidebar.selectbox(
+        'Select data interval:',
+        options=list(interval_options.keys()),
+        index=3,  # Default to Daily
+        help='Choose the interval between data points'
+    )
+    interval = interval_options[selected_interval]
+
+    # Add informational message about data points
+    st.sidebar.info(f"Using {selected_interval.lower()} data for analysis. Adjust interval if needed for more/fewer data points.")
 else:
     st.sidebar.info("Using weekly data for longer time periods.")
 
-# Fetch data based on selected period
-tickers, tickers_data, benchmark_data, window = fetch_data(period_options[selected_period])
+# Fetch data based on selected period and interval
+tickers, tickers_data, benchmark_data, window = fetch_data(period_options[selected_period], interval)
 
 
 # Function to calculate RS (Relative Strength)
