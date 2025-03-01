@@ -28,7 +28,8 @@ st.write('An interactive visualization tool for Relative Rotation Graphs (RRG)')
 @st.cache_data(ttl=3600)  # Cache data for 1 hour
 def fetch_data(period='1y'):
     tickers = ['^CNXAUTO', '^CNXFMCG', '^CNXIT', '^CNXREALTY', '^CNXCONSUM', 
-               '^CNXMETAL', '^CNXENERGY', '^CNXMEDIA', '^CNXINFRA', '^CNXPSUBANK', '^NSEBANK']
+               '^CNXMETAL', '^CNXENERGY', '^CNXMEDIA', '^CNXINFRA', '^CNXPSUBANK', '^NSEBANK',
+              '^CNXPHARMA', 'NIFTY_MIDCAP_100.NS',  'NIFTY_MID_SELECT.NS']
     benchmark = '^NSEI'
 
     # Use daily data for shorter periods
